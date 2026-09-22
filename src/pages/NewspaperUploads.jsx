@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react'
 import { ImagePlus, Trash2, Upload } from 'lucide-react'
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { storage } from '../firebase'
 import MetricTile from '../components/MetricTile'
 import PageHeader from '../components/PageHeader'
 import Panel from '../components/Panel'
 import { useToast } from '../hooks/useToast'
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection'
 import { addDocument, removeDocument } from '../utils/firestoreCrud'
+import { compressImageToDataUrl } from '../utils/imageCompression'
 import { formatTimestamp } from '../utils/jobPortalHelpers'
 import { newspapers } from '../data/jobPortalData'
 
@@ -56,17 +55,13 @@ function NewspaperUploads() {
 
     setUploading(true)
     try {
-      const path = `newspaper-uploads/${newspaper}/${Date.now()}_${file.name}`
-      const storageRef = ref(storage, path)
-      await uploadBytes(storageRef, file)
-      const imageUrl = await getDownloadURL(storageRef)
+      const imageUrl = await compressImageToDataUrl(file)
 
       await addDocument('newspaperUploads', {
         newspaper,
         date,
         caption: caption.trim() || null,
         imageUrl,
-        storagePath: path,
       })
 
       showToast(`${newspaper} page uploaded — now visible on the website.`)
@@ -81,9 +76,6 @@ function NewspaperUploads() {
   const handleDelete = async (upload) => {
     setDeletingId(upload.id)
     try {
-      if (upload.storagePath) {
-        await deleteObject(ref(storage, upload.storagePath)).catch(() => {})
-      }
       await removeDocument('newspaperUploads', upload.id)
       showToast('Newspaper page removed.')
     } catch (err) {
@@ -173,7 +165,7 @@ function NewspaperUploads() {
               </div>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               <div className="text-sm text-slate-500">
-                {file ? file.name : 'JPG or PNG, up to 10MB. Click the box to choose a file.'}
+                {file ? file.name : 'JPG or PNG, up to 10MB — compressed automatically to fit the database.'}
               </div>
             </div>
           </div>

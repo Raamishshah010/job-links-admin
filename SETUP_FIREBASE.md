@@ -56,7 +56,7 @@ the part of this admin panel that's actually specific to JobsLinks.pk:
 | Job Portal → Advertisements | Firestore `advertisements` | Approve/pause/end campaigns; feeds the website's homepage ad banner |
 | Job Portal → Subscriptions | Firestore `paymentRequests` | Same approve/reject flow as the website's own `/admin` — use either, they hit the same data |
 | Job Portal → Job Seekers | Firestore `users` (read-only) | Visibility into website signups, not a second place to edit them |
-| Job Portal → Newspaper Pages | Firestore `newspaperUploads` + Firebase Storage | Upload photos/scans of real newspaper job pages — shows on the website's `/newspapers` gallery. **Needs Firebase Storage enabled** (Console → Storage → Get started) and `storage.rules` deployed from the website project — see its `SETUP_NEWSPAPER_UPLOADS.md`. |
+| Job Portal → Newspaper Pages | Firestore `newspaperUploads` only (no Firebase Storage — kept free) | Upload photos/scans of real newspaper job pages — shows on the website's `/newspapers` gallery. Images are compressed in-browser and stored directly in Firestore, so no Storage/Blaze plan is needed — see the website's `SETUP_NEWSPAPER_UPLOADS.md`. |
 
 **Deliberately left on mock data / unchanged this pass:** Dashboard's
 sidebar siblings — Leads, Orders, Customers — model a generic SaaS sales
